@@ -257,7 +257,7 @@ def format_response(data):
         "creditScoreInfo": data.get("creditScoreInfo", {}),
         "petInfo": data.get("petInfo", {}),
         "socialinfo": data.get("socialInfo", {}),
-        "Developer": "Developed by Robiul"
+        "CREDITS": "🌟 𝗗𝗲𝘃𝗲𝗹𝗼𝗽𝗲𝗱 𝗯𝘆 𝗥𝗼𝗯𝗶𝘂𝗹 | 𝗢𝗕𝟱𝟯 𝗙𝗙 𝗔𝗣𝗜 🌟"
     }
 
 # === API Routes ===
@@ -265,8 +265,8 @@ def format_response(data):
 def home():
     return jsonify({
         "status": "online",
-        "message": "Free Fire OB53 Player Info API - Developed by Robiul",
-        "author": "Robiul",
+        "message": "🌟 𝗙𝗿𝗲𝗲 𝗙𝗶𝗿𝗲 𝗢𝗕𝟱𝟯 𝗣𝗹𝗮𝘆𝗲𝗿 𝗜𝗻𝗳𝗼 𝗔𝗣𝗜 - 𝗗𝗲𝘃𝗲𝗹𝗼𝗽𝗲𝗱 𝗯𝘆 𝗥𝗼𝗯𝗶𝘂𝗹 🌟",
+        "author": "🌟 𝗥𝗼𝗯𝗶𝘂𝗹 🌟",
         "endpoints": {
             "get_player": "/get?uid=XXXX&region=BD",
             "health_check": "/ping"
