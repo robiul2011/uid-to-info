@@ -257,7 +257,7 @@ def format_response(data):
         "creditScoreInfo": data.get("creditScoreInfo", {}),
         "petInfo": data.get("petInfo", {}),
         "socialinfo": data.get("socialInfo", {}),
-        "DevelopedBy": "Robiul"
+        "Developer": "Developed by Robiul"
     }
 
 # === API Routes ===
