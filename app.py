@@ -260,6 +260,18 @@ def format_response(data):
     }
 
 # === API Routes ===
+@app.route('/')
+def home():
+    return jsonify({
+        "status": "online",
+        "message": "Free Fire OB53 Player Info API is running!",
+        "author": "Antigravity",
+        "endpoints": {
+            "get_player": "/get?uid=XXXX&region=BD",
+            "health_check": "/ping"
+        }
+    }), 200
+
 @app.route('/get')
 def get_account_info():
     uid = request.args.get('uid')
