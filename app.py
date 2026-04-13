@@ -256,7 +256,8 @@ def format_response(data):
         "captainBasicInfo": data.get("captainBasicInfo", {}),
         "creditScoreInfo": data.get("creditScoreInfo", {}),
         "petInfo": data.get("petInfo", {}),
-        "socialinfo": data.get("socialInfo", {})
+        "socialinfo": data.get("socialInfo", {}),
+        "DevelopedBy": "Robiul"
     }
 
 # === API Routes ===
@@ -264,8 +265,8 @@ def format_response(data):
 def home():
     return jsonify({
         "status": "online",
-        "message": "Free Fire OB53 Player Info API is running!",
-        "author": "Antigravity",
+        "message": "Free Fire OB53 Player Info API - Developed by Robiul",
+        "author": "Robiul",
         "endpoints": {
             "get_player": "/get?uid=XXXX&region=BD",
             "health_check": "/ping"
