@@ -215,51 +215,161 @@ async def GetAccountInformation(uid, unk, region, endpoint):
             
     raise Exception("All lookup regions are currently busy or rate limited. Please try again in 1 minute.")
 
+def _ts(unix_ts):
+    """Convert a Unix timestamp integer to a human-readable UTC string."""
+    if not unix_ts:
+        return None
+    try:
+        import datetime
+        return datetime.datetime.utcfromtimestamp(int(unix_ts)).strftime("%Y-%m-%d %H:%M:%S UTC")
+    except Exception:
+        return unix_ts
+
+def _rank_name(points):
+    """Map BR rank points to a rank tier name."""
+    if points is None:
+        return None
+    p = int(points)
+    if p == 0:   return "Unranked"
+    if p < 200:  return f"Bronze III ({p} pts)"
+    if p < 400:  return f"Bronze II ({p} pts)"
+    if p < 600:  return f"Bronze I ({p} pts)"
+    if p < 900:  return f"Silver III ({p} pts)"
+    if p < 1200: return f"Silver II ({p} pts)"
+    if p < 1500: return f"Silver I ({p} pts)"
+    if p < 1900: return f"Gold III ({p} pts)"
+    if p < 2300: return f"Gold II ({p} pts)"
+    if p < 2700: return f"Gold I ({p} pts)"
+    if p < 3200: return f"Platinum III ({p} pts)"
+    if p < 3700: return f"Platinum II ({p} pts)"
+    if p < 4200: return f"Platinum I ({p} pts)"
+    if p < 5000: return f"Diamond III ({p} pts)"
+    if p < 5800: return f"Diamond II ({p} pts)"
+    if p < 6600: return f"Diamond I ({p} pts)"
+    if p < 7500: return f"Heroic ({p} pts)"
+    return f"Grandmaster ({p} pts)"
+
+def _cs_rank_name(points):
+    """Map CS rank points to a rank tier name."""
+    if points is None:
+        return None
+    p = int(points)
+    if p == 0:   return "Unranked"
+    if p < 100:  return f"Bronze ({p} pts)"
+    if p < 300:  return f"Silver ({p} pts)"
+    if p < 600:  return f"Gold ({p} pts)"
+    if p < 1000: return f"Platinum ({p} pts)"
+    if p < 1500: return f"Diamond ({p} pts)"
+    return f"Heroic ({p} pts)"
+
+def _clean(d):
+    """Recursively remove None values from a dict."""
+    if isinstance(d, dict):
+        return {k: _clean(v) for k, v in d.items() if v is not None and v != "None" and v != ""}
+    if isinstance(d, list):
+        return [_clean(i) for i in d]
+    return d
+
 def format_response(data):
-    return {
-        "AccountInfo": {
-            "AccountAvatarId": data.get("basicInfo", {}).get("headPic"),
-            "AccountBPBadges": data.get("basicInfo", {}).get("badgeCnt"),
-            "AccountBPID": data.get("basicInfo", {}).get("badgeId"),
-            "AccountBannerId": data.get("basicInfo", {}).get("bannerId"),
-            "AccountCreateTime": data.get("basicInfo", {}).get("createAt"),
-            "AccountEXP": data.get("basicInfo", {}).get("exp"),
-            "AccountLastLogin": data.get("basicInfo", {}).get("lastLoginAt"),
-            "AccountLevel": data.get("basicInfo", {}).get("level"),
-            "AccountLikes": data.get("basicInfo", {}).get("liked"),
-            "AccountName": data.get("basicInfo", {}).get("nickname"),
-            "AccountRegion": data.get("basicInfo", {}).get("region"),
-            "AccountSeasonId": data.get("basicInfo", {}).get("seasonId"),
-            "AccountType": data.get("basicInfo", {}).get("accountType"),
-            "BrMaxRank": data.get("basicInfo", {}).get("maxRank"),
-            "BrRankPoint": data.get("basicInfo", {}).get("rankingPoints"),
-            "CsMaxRank": data.get("basicInfo", {}).get("csMaxRank"),
-            "CsRankPoint": data.get("basicInfo", {}).get("csRankingPoints"),
-            "EquippedWeapon": data.get("basicInfo", {}).get("weaponSkinShows", []),
-            "ReleaseVersion": data.get("basicInfo", {}).get("releaseVersion"),
-            "ShowBrRank": data.get("basicInfo", {}).get("showBrRank"),
-            "ShowCsRank": data.get("basicInfo", {}).get("showCsRank"),
-            "Title": data.get("basicInfo", {}).get("title")
+    basic       = data.get("basicInfo", {})
+    profile     = data.get("profileInfo", {})
+    clan        = data.get("clanBasicInfo", {})
+    captain     = data.get("captainBasicInfo", {})
+    credit      = data.get("creditScoreInfo", {})
+    pet         = data.get("petInfo", {})
+    social      = data.get("socialInfo", {})
+
+    br_pts  = basic.get("rankingPoints")
+    cs_pts  = basic.get("csRankingPoints")
+    br_max  = basic.get("maxRank")
+    cs_max  = basic.get("csMaxRank")
+
+    avatar_id = basic.get("headPic")
+    banner_id = basic.get("bannerId")
+
+    result = {
+        "status": "success",
+        "PlayerInfo": {
+            "UID": basic.get("accountId"),
+            "Nickname": basic.get("nickname"),
+            "Level": basic.get("level"),
+            "EXP": basic.get("exp"),
+            "Likes": basic.get("liked"),
+            "Region": basic.get("region"),
+            "AccountType": basic.get("accountType"),
+            "SeasonID": basic.get("seasonId"),
+            "ReleaseVersion": basic.get("releaseVersion"),
+            "Title": basic.get("title"),
+            "AvatarID": avatar_id,
+            "AvatarURL": f"https://dl.dir.freefiremobile.com/common/web_event/official2.0ff.garena.top/OB42/avatar/{avatar_id}.png" if avatar_id else None,
+            "BannerID": banner_id,
+            "BannerURL": f"https://dl.dir.freefiremobile.com/common/web_event/official2.0ff.garena.top/OB42/banner/{banner_id}.png" if banner_id else None,
+            "BadgeID": basic.get("badgeId"),
+            "BadgeCount": basic.get("badgeCnt"),
+            "AccountCreated": _ts(basic.get("createAt")),
+            "LastLogin": _ts(basic.get("lastLoginAt")),
         },
-        "AccountProfileInfo": {
-            "EquippedOutfit": data.get("profileInfo", {}).get("clothes", []),
-            "EquippedSkills": data.get("profileInfo", {}).get("equipedSkills", [])
+        "RankInfo": {
+            "BR_RankPoints": br_pts,
+            "BR_CurrentRank": _rank_name(br_pts),
+            "BR_MaxRank": _rank_name(br_max),
+            "BR_ShowRank": basic.get("showBrRank"),
+            "CS_RankPoints": cs_pts,
+            "CS_CurrentRank": _cs_rank_name(cs_pts),
+            "CS_MaxRank": _cs_rank_name(cs_max),
+            "CS_ShowRank": basic.get("showCsRank"),
+        },
+        "EquipmentInfo": {
+            "EquippedOutfit": profile.get("clothes", []),
+            "EquippedSkills": profile.get("equipedSkills", []),
+            "EquippedWeaponSkins": basic.get("weaponSkinShows", []),
         },
         "GuildInfo": {
-            "GuildCapacity": data.get("clanBasicInfo", {}).get("capacity"),
-            "GuildID": str(data.get("clanBasicInfo", {}).get("clanId")),
-            "GuildLevel": data.get("clanBasicInfo", {}).get("clanLevel"),
-            "GuildMember": data.get("clanBasicInfo", {}).get("memberNum"),
-            "GuildName": data.get("clanBasicInfo", {}).get("clanName"),
-            "GuildOwner": str(data.get("clanBasicInfo", {}).get("captainId"))
+            "GuildID": str(clan.get("clanId")) if clan.get("clanId") else None,
+            "GuildName": clan.get("clanName"),
+            "GuildLevel": clan.get("clanLevel"),
+            "GuildMembers": clan.get("memberNum"),
+            "GuildCapacity": clan.get("capacity"),
+            "GuildOwnerUID": str(clan.get("captainId")) if clan.get("captainId") else None,
         },
-        "captainBasicInfo": data.get("captainBasicInfo", {}),
-        "creditScoreInfo": data.get("creditScoreInfo", {}),
-        "petInfo": data.get("petInfo", {}),
-        "socialinfo": data.get("socialInfo", {}),
-        "zz_DEVELOPER_SIGNATURE": "━━━━━━━━━━━━━━ 🌟 Developed by Robiul 🌟 ━━━━━━━━━━━━━━",
-        "zz_API_INFO": "✨ FREE FIRE OB53 PLAYER INFO | Contact Telegram: @robiul_dev ✨"
+        "GuildOwnerInfo": {
+            "OwnerUID": captain.get("accountId"),
+            "OwnerName": captain.get("nickname"),
+            "OwnerLevel": captain.get("level"),
+            "OwnerEXP": captain.get("exp"),
+            "OwnerLikes": captain.get("liked"),
+            "OwnerLastLogin": _ts(captain.get("lastLoginAt")),
+            "OwnerAvatarID": captain.get("headPic"),
+        } if captain else None,
+        "CreditInfo": {
+            "CreditScore": credit.get("creditScore"),
+            "CreditLevel": credit.get("creditScoreLevel"),
+            "PeriodicSummary": credit.get("periodicSummary"),
+        } if credit else None,
+        "PetInfo": {
+            "PetID": pet.get("id"),
+            "PetName": pet.get("name"),
+            "PetLevel": pet.get("level"),
+            "PetEXP": pet.get("exp"),
+            "PetSelectedSkillID": pet.get("selectedSkillId"),
+            "PetSkinID": pet.get("skinId"),
+            "PetIsSelected": pet.get("isSelected"),
+        } if pet else None,
+        "SocialInfo": {
+            "AccountLanguage": social.get("language"),
+            "AccountPreferMode": social.get("modePrefer"),
+            "AccountBioSignature": social.get("signature"),
+        } if social else None,
+        "Developer": {
+            "Name": "Robiul",
+            "API": "Free Fire OB53 Player Info API",
+            "Version": "v1.0.0",
+            "Contact": "Telegram: @robiul_dev",
+            "Credits": "🌟 Developed by Robiul | All Rights Reserved 🌟"
+        }
     }
+
+    return _clean(result)
 
 # === API Routes ===
 @app.route('/')
