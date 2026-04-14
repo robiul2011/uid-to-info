@@ -27,6 +27,7 @@ import os
 # === Flask App Setup ===
 app = Flask(__name__)
 CORS(app)
+app.json.sort_keys = False  # Keep response keys in insertion order (Developer stays at bottom)
 cache = TTLCache(maxsize=100, ttl=300)
 cached_tokens = defaultdict(dict)
 tokens_initialized = False
@@ -262,7 +263,7 @@ def format_response(data):
             "API": "Free Fire OB53 Player Info API",
             "Version": "v1.0.0",
             "Contact": "Telegram: @robiul_dev",
-            "Info": "✨ FREE FIRE OB53 PLAYER INFO | Telegram: @robiul_dev ✨",
+            "Info": "✨ FREE FIRE OB53 PLAYER INFO | Telegram: @robiul15991 ✨",
             "Credits": "━━━━━━━━━━ 🌟 Developed by Robiul 🌟 ━━━━━━━━━━"
         }
     }
@@ -274,7 +275,7 @@ def home():
         "status": "online",
         "message": "━━━━━━━━━ 🌟 𝗙𝗿𝗲𝗲 𝗙𝗶𝗿𝗲 𝗢𝗕𝟱𝟯 𝗔𝗣𝗜 🌟 ━━━━━━━━━",
         "developer": "🌟 𝗗𝗲𝘃𝗲𝗹𝗼𝗽𝗲𝗱 𝗯𝘆 𝗥𝗼𝗯𝗶𝘂𝗹 🌟",
-        "contact": "Contact Telegram: @robiul_dev",
+        "contact": "Contact Telegram: @robiul15991",
         "endpoints": {
             "get_player": "/get?uid=XXXX&region=BD",
             "health_check": "/ping"
